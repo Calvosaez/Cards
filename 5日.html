@@ -1,0 +1,290 @@
+
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+            <style>
+            body {
+                background-color: black; /* Cambia el color de fondo a negro */
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 100vh;
+                margin: 0;
+                color: white;
+                font-size: 28px;
+                font-family: Arial, sans-serif;
+            }
+            .content-container {
+                background-color: #5b1d1d; 
+                width: calc(100% - 0px); /* Adjusted width to fit content */
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 0px; /* Added padding */
+                box-sizing: border-box; /* Ensure padding is included in the width */
+                height: 1000px;
+
+            }
+            .image-frame {
+                width: 1000px;
+                height: 400px;
+                overflow: hidden;
+                margin-top: -38px;
+                margin-bottom: 20px;
+            }
+            .image-frame img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+            }
+            button {
+                background-color: #9f3838;
+                border: none;
+                color: #ffffff;
+                padding: 6px 32px;
+                text-align: center;
+                display: inline-block;
+                font-size: 28px;
+                cursor: pointer;
+                margin: 20px 5px;
+                height: 50px;
+            }
+            .container1 {
+                display: inline-block;
+            }
+            .button-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                margin-top: -30px;
+            }
+            .button-row {
+                display: flex;
+                align-items: center;
+            }
+            #fraseJapones, #fraseEspanol {
+                visibility: hidden;
+                margin-top: 0px;
+                margin-bottom: 0px;
+            }
+            .wavesurfer-container {
+                width: 800px;
+                height: 70px;
+                background-color: white;
+            }
+            button, input[type=checkbox] {
+                margin-top: 20px;
+                font-size: 20px;
+                padding: 10px;
+            }
+            .audio-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                margin-top: 20px;
+                position: relative;
+            }
+            #dropbox-controls-container {
+                display: flex;
+                justify-content: center;
+            }
+            </style>
+        </head>
+        <body>
+            <div class="content-container">
+                <div class="button-container">
+        
+            <button id="btn1">いつか</button>
+            <br>
+            <script>
+                var textos1 = ['いつか', 'Dia 5'];
+                document.getElementById('btn1').addEventListener('click', function() {
+                    this.textContent = textos1.reverse()[0];
+                });
+            </script>
+            
+            <div class="image-frame">
+                <img src="https://dl.dropboxusercontent.com/scl/fi/dsnx6cr9xhb313kkz295h/00_NoImage.jpg?rlkey=jgbjvy3j97dc09scynmf8iaiq&dl=0" style="object-fit: contain; width: 100%; height: 100%;">
+            </div>
+            
+            <div class="container1">
+                <div id="dropbox-wavesurfer-container" class="wavesurfer-container"></div>
+                <div id="dropbox-controls-container"></div>
+            </div>
+            <script src="https://unpkg.com/wavesurfer.js"></script>
+            
+            <script>
+                const createControls = (waveform, container) => {
+                    const controls = document.createElement('div');
+                    const playPauseBtn = document.createElement('button');
+                    const stopBtn = document.createElement('button');
+                    const speedControl = document.createElement('input');
+                    const resetSpeedBtn = document.createElement('button');
+                    const loopCheckbox = document.createElement('input');
+                    const loopLabel = document.createElement('label');
+
+                    playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+                    stopBtn.innerHTML = '<i class="fas fa-stop"></i>';
+                    resetSpeedBtn.textContent = 'Normal speed';
+                    speedControl.type = 'range';
+                    speedControl.min = '0';
+                    speedControl.max = '2';
+                    speedControl.value = '1.0';
+                    speedControl.step = '0.1';
+                    loopCheckbox.type = 'checkbox';
+                    loopLabel.textContent = 'Bucle';
+
+                    controls.appendChild(playPauseBtn);
+                    controls.appendChild(stopBtn);
+                    controls.appendChild(document.createTextNode('Speed: '));
+                    controls.appendChild(speedControl);
+                    controls.appendChild(resetSpeedBtn);
+                    controls.appendChild(loopLabel);
+                    controls.appendChild(loopCheckbox);
+                    container.appendChild(controls);
+
+                    let isLooping = false;
+
+                    loopCheckbox.addEventListener('change', () => {
+                        isLooping = loopCheckbox.checked;
+                    });
+
+                    playPauseBtn.addEventListener('click', () => {
+                        if (waveform.isPlaying()) {
+                            waveform.pause();
+                            playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+                        } else {
+                            waveform.play();
+                            playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                        }
+                    });
+
+                    stopBtn.addEventListener('click', () => {
+                        waveform.stop();
+                        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+                    });
+
+                    speedControl.addEventListener('input', () => {
+                        waveform.setPlaybackRate(speedControl.value);
+                    });
+
+                    resetSpeedBtn.addEventListener('click', () => {
+                        waveform.setPlaybackRate(1);
+                        speedControl.value = '1';
+                    });
+
+                    waveform.on('finish', () => {
+                        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+                        if (isLooping) {
+                            waveform.play();
+                        } else {
+                            waveform.stop();
+                            waveform.seekTo(0);
+                        }
+                    });
+                };
+                const dropboxWaveform = WaveSurfer.create({
+                    container: '#dropbox-wavesurfer-container',
+                    waveColor: '#5b1d1d',
+                    progressColor: '#c30404',
+                    height: 70,
+                    backend: 'MediaElement'
+                });
+                dropboxWaveform.load('https://dl.dropboxusercontent.com/scl/fi/4mx69py2o13ryj9f1timo/5-5.mp3?rlkey=losj4gexsl55plqse89oz9bzl&dl=0');
+                createControls(dropboxWaveform, document.getElementById('dropbox-controls-container'));
+            </script>
+            </div>
+        
+            <div class="button-row">
+                <button id="botonJapones">Frase Japones</button>
+                <button id="botonPlayJapones" style="margin-left: 20px;">Play</button>
+            </div>
+            <p id="fraseJapones">5月5日は祝日です</p>
+            
+            <div class="button-row">
+                <button id="botonEspanol">Frase Español</button>
+                <button id="botonPlayEspanol" style="margin-left: 20px;">Play</button>
+            </div>
+            <p id="fraseEspanol">El dia 5 de mayo es festivo</p>
+            
+        <script>
+            var botonJapones = document.getElementById('botonJapones');
+            var botonEspanol = document.getElementById('botonEspanol');
+            var botonPlayJapones = document.getElementById('botonPlayJapones');
+            var botonPlayEspanol = document.getElementById('botonPlayEspanol');
+            var fraseJapones = document.getElementById('fraseJapones');
+            var fraseEspanol = document.getElementById('fraseEspanol');
+
+            if (botonJapones != null) {
+                botonJapones.addEventListener('click', function() {
+                    if (fraseJapones.style.visibility === 'hidden') {
+                        fraseJapones.style.visibility = 'visible';
+                    } else {
+                        fraseJapones.style.visibility = 'hidden';
+                    }
+                });
+            }
+            if (botonEspanol != null) {
+                botonEspanol.addEventListener('click', function() {
+                    if (fraseEspanol.style.visibility === 'hidden') {
+                        fraseEspanol.style.visibility = 'visible';
+                    } else {
+                        fraseEspanol.style.visibility = 'hidden';
+                    }
+                });
+            }
+            if (botonPlayJapones != null) {
+                botonPlayJapones.addEventListener('click', function() {
+                    let seleccion = document.getElementById('fraseJapones').innerText;
+                    const frase = new SpeechSynthesisUtterance(seleccion);
+                    frase.lang = "ja-JP"; // Establece el idioma japonés
+                    speechSynthesis.speak(frase);
+                });
+            }
+            if (botonPlayEspanol != null) {
+                botonPlayEspanol.addEventListener('click', function() {
+                    let seleccion = document.getElementById('fraseEspanol').innerText;
+                    const frase = new SpeechSynthesisUtterance(seleccion);
+                    frase.lang = "es-ES"; // Establece el idioma español
+                    speechSynthesis.speak(frase);
+                });
+            }
+        </script>
+        <script>
+        function reproducirSeleccionConTeclaP(event) {
+            let seleccion = window.getSelection().toString();
+            if (seleccion) {
+                if (document.getElementById('fraseJapones') != null && document.getElementById('fraseJapones').innerText.includes(seleccion)) {
+                    const frase = new SpeechSynthesisUtterance(seleccion);
+                    frase.lang = "ja-JP"; // Establece el idioma japonés
+                    speechSynthesis.speak(frase);
+                } else if (document.getElementById('fraseEspanol') != null && document.getElementById('fraseEspanol').innerText.includes(seleccion)) {
+                    const frase = new SpeechSynthesisUtterance(seleccion);
+                    frase.lang = "es-ES"; // Establece el idioma español
+                    speechSynthesis.speak(frase);
+                }
+            } else {
+                if (document.getElementById('fraseJapones') != null && document.getElementById('fraseJapones').style.visibility === 'visible') {
+                    const frase = new SpeechSynthesisUtterance(document.getElementById('fraseJapones').innerText);
+                    frase.lang = "ja-JP"; // Establece el idioma japonés
+                    speechSynthesis.speak(frase);
+                } else if (document.getElementById('fraseEspanol') != null && document.getElementById('fraseEspanol').style.visibility === 'visible') {
+                    const frase = new SpeechSynthesisUtterance(document.getElementById('fraseEspanol').innerText);
+                    frase.lang = "es-ES"; // Establece el idioma español
+                    speechSynthesis.speak(frase);
+                }
+            }
+        }
+        document.addEventListener("keydown", function(event) {
+            if (event.key === "p") {
+                reproducirSeleccionConTeclaP(event);
+            }
+        });
+        </script>
+    </div>
+    </body>
+    </html>
+    
